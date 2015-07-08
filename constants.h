@@ -1,0 +1,8 @@
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
+#define IRQ_IN_PACKETSIZE 1
+#define CTRL_REPORT_PACKETSIZE 1
+
+
+#endif

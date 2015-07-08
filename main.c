@@ -3,7 +3,9 @@
 #include <string.h> 
 #include <stdio.h> 
 #include <stdlib.h>
-#include <stdint.h> 
+#include <stdint.h>
+#include <stdbool.h>
+#include <fcntl.h>
 
 #include "command.h"
 #include "usb.h"
@@ -35,17 +37,29 @@ static void sighandler(int signal) {
 }
 
 int main(int argc, char **argv) {
-
+    int flags;
 
 	signal(SIGINT, sighandler);
     signal(SIGTERM, sighandler);
 
-    usb_init();
-    usb_connect_device(0x2047, 0x0301);
+    printf("\n-----------------------------------------\n");
+    printf("Simple Linux custom HID test application\n");
+    printf("----------type help for commands----------\n");
 
+    // make fgets non-blocking (POSIX only)
+    flags = fcntl(0, F_GETFL, 0); /* get current file status flags */
+    flags |= O_NONBLOCK; /* turn off blocking flag */
+    fcntl(0, F_SETFL, flags); 
+
+    usb_init();
+    
     while (!sigexit) {
 
     	command_get_command();
+        
+        if (usb_device.irq == true) {
+            usb_get_IN_packet(true);
+        }
     }
 	return 0;
 }

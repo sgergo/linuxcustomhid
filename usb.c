@@ -20,40 +20,49 @@ void usb_print_error_message(int errorcode) {
         printf("libusb error code %d: %s\n", errorcode, libusb_error_name(errorcode));
     else
         printf("%s\n", libusb_error_name(errorcode));
+    printf("\n");
 }
 
 int usb_connect_device(uint16_t vid, uint16_t pid) {
     int errorcode;
 
     usb_device.device_connected = false;
-	handle = libusb_open_device_with_vid_pid(NULL, vid, pid); 
-
-    if (handle == NULL) 
-        return (-1);
     
-    libusb_detach_kernel_driver(handle, 0); 
+    printf("attempting to connect VID:PID %04x:%04x...", vid, pid);
+	handle = libusb_open_device_with_vid_pid(NULL, vid, pid); 
+    
+    if (handle == NULL) {
+        printf("\n");
+        return (-1);
+    }
+    printf("done\n");
+    
     usb_device.device_connected = true;
-
+    libusb_detach_kernel_driver(handle, 0); 
     usb_device.interface_claimed = false;
+    printf("attempting to set configuration...");
     errorcode = libusb_set_configuration(handle, 1); 
     if (errorcode < 0) {
+            printf("\n");
             usb_print_error_message(errorcode);
             return -1;
         }
-    
+    printf("done\n");
+    printf("attempting to claim interface...");
     errorcode = libusb_claim_interface(handle, 0); 
     if (errorcode < 0) {
+            printf("\n");
             usb_print_error_message(errorcode);
             return -1;
         }
-
+    printf("done\n");
     usb_device.interface_claimed = true;
     return 0;  
 }
 
 int usb_get_IN_packet(bool arraymode) {
     int errorcode; 
-    unsigned int transferred;
+    int transferred;
     int i;
     static int j = 0;
 
@@ -68,13 +77,13 @@ int usb_get_IN_packet(bool arraymode) {
         printf("Interrupt transfer short read (%d byte(s))\n", transferred); 
         return -1; 
     }
-
+    
+    if(j%8 == 0)
+        printf("\nReceived: ");
     for (i = 0; i < IRQ_IN_PACKETSIZE; i++) {
         printf("%3d ", usb_device.irqinbuffer[i]);
         if (arraymode) {
             j++;
-            if(j%8 == 0) 
-                 printf("\n");
         } else
             printf("\n"); 
     }
@@ -86,7 +95,7 @@ int usb_get_IN_packet(bool arraymode) {
     int errorcode; 
     int i;
     static int j = 0;
-    printf("getr magic: %0d\n", (HID_REPORT_TYPE_INPUT<<8)|0x00);
+    // printf("getr magic: %0d\n", (HID_REPORT_TYPE_INPUT<<8)|0x00);
 
     errorcode = libusb_control_transfer(handle, CTRL_IN, HID_GET_REPORT, 
                                         (HID_REPORT_TYPE_INPUT<<8)|0x00, 
@@ -96,13 +105,13 @@ int usb_get_IN_packet(bool arraymode) {
             usb_print_error_message(errorcode);
             return -1;
     }
-
+    printf("Received: ");
     for (i = 0; i < CTRL_REPORT_PACKETSIZE; i++) {
         printf("%3d ", usb_device.ctrlreportinbuffer[i]);
         if (arraymode) {
             j++;
             if(j%8 == 0) 
-                 printf("\n");
+                 printf("\nReceived: ");
         } else
             printf("\n"); 
     }
@@ -112,11 +121,9 @@ int usb_get_IN_packet(bool arraymode) {
 
 int usb_set_control_report_packet(unsigned char num) {
     int errorcode; 
-    int i;
-    static int j = 0;
 
     usb_device.ctrlreportoutbuffer[0] = num;
-    printf("setr magic: %d\n", (HID_REPORT_TYPE_OUTPUT<<8)|0x00);
+    // printf("setr magic: %d\n", (HID_REPORT_TYPE_OUTPUT<<8)|0x00);
 
     errorcode = libusb_control_transfer(handle, CTRL_OUT, HID_SET_REPORT, 
                                         (HID_REPORT_TYPE_OUTPUT<<8)|0x00, 
@@ -126,7 +133,7 @@ int usb_set_control_report_packet(unsigned char num) {
             usb_print_error_message(errorcode);
             return -1;
     }
-
+    printf("Sent: 0x%02x\n", num);
     return 0;
 }
 

@@ -35,51 +35,51 @@ void command_get_command(void) {
 	}
 }
 
-// Command 'example1'
-static int command_example1(int argc, char *argv[]) {
+// // Command 'example1'
+// static int command_example1(int argc, char *argv[]) {
 
-    if (argc < 2) {
-        printf("error: missing argument.\n");
-        return (0);
-    }
+//     if (argc < 2) {
+//         printf("error: missing argument.\n");
+//         return (0);
+//     }
 
-    if (!strcmp (argv[1], "on")) {
-        //TODO
-    } else if (!strcmp (argv[1], "off")) {
-        //TODO
-    } else
-        printf("error: invalid input.\n");
+//     if (!strcmp (argv[1], "on")) {
+//         //TODO
+//     } else if (!strcmp (argv[1], "off")) {
+//         //TODO
+//     } else
+//         printf("error: invalid input.\n");
 
-    return(0);
-}
+//     return(0);
+// }
 
-// Command 'example2'
-static int command_example2(int argc, char *argv[]) {
-    long num;
-    char *endptr;
+// // Command 'example2'
+// static int command_example2(int argc, char *argv[]) {
+//     long num;
+//     char *endptr;
    
-    if (argc < 2) {
-        printf("error: missing value.\n");
-        return (0);
-    }
+//     if (argc < 2) {
+//         printf("error: missing value.\n");
+//         return (0);
+//     }
 
-    errno = 0;
-    num = strtol(argv[1], &endptr, 16);
+//     errno = 0;
+//     num = strtol(argv[1], &endptr, 16);
 
-    if (*endptr != 0 || errno != 0) {
-        printf("error: invalid input.\n");
-        return (0);
-    }
+//     if (*endptr != 0 || errno != 0) {
+//         printf("error: invalid input.\n");
+//         return (0);
+//     }
 
-    // TODO: num contains a valid value, now do something with it
+//     // TODO: num contains a valid value, now do something with it
     
-    return(0);
-}
+//     return(0);
+// }
 
 static int command_connect(int argc, char *argv[]) {
 
-    printf("attempting to connect VID:PID 2047:0301...\n");
-    usb_print_error_message(usb_connect_device(0x2047, 0x0301));
+    
+    usb_print_error_message(usb_connect_device(0x1cbe, 0x000a));
 
     return(0);
 }

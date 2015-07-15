@@ -27,6 +27,7 @@ int usb_connect_device(uint16_t vid, uint16_t pid) {
     int errorcode;
 
     usb_device.device_connected = false;
+    handle = NULL;
     
     printf("attempting to connect VID:PID %04x:%04x...", vid, pid);
 	handle = libusb_open_device_with_vid_pid(NULL, vid, pid); 
@@ -35,10 +36,12 @@ int usb_connect_device(uint16_t vid, uint16_t pid) {
         printf("\n");
         return (-1);
     }
+
+    usb_device.device_connected = true;
     printf("done\n");
     
-    usb_device.device_connected = true;
     libusb_detach_kernel_driver(handle, 0); 
+
     usb_device.interface_claimed = false;
     printf("attempting to set configuration...");
     errorcode = libusb_set_configuration(handle, 1); 
@@ -55,8 +58,9 @@ int usb_connect_device(uint16_t vid, uint16_t pid) {
             usb_print_error_message(errorcode);
             return -1;
         }
-    printf("done\n");
+
     usb_device.interface_claimed = true;
+    printf("done\n");
     return 0;  
 }
 
@@ -95,6 +99,7 @@ int usb_get_IN_packet(bool arraymode) {
     int errorcode; 
     int i;
     static int j = 0;
+    //TODO
     // printf("getr magic: %0d\n", (HID_REPORT_TYPE_INPUT<<8)|0x00);
 
     errorcode = libusb_control_transfer(handle, CTRL_IN, HID_GET_REPORT, 
@@ -220,9 +225,6 @@ int usb_init(void) {
     	usb_print_error_message(errorcode);
     	return -1;
     }
-
-    usb_device.device_connected = false;
-    handle = NULL;
 
     return 0;
 }
